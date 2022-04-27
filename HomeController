@@ -1,0 +1,119 @@
+using CrudOperationsMVC.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace CrudOperationsMVC.Controllers
+{
+    public class HomeController : Controller
+    {
+        private ApplicationDbContext _context;
+        public HomeController()
+        {
+            _context = new ApplicationDbContext();
+        }
+
+        public ActionResult Index()
+        {
+            var listofData = _context.Employee.ToList();
+            return View(listofData);
+        }
+
+        [HttpGet]
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Create(Employee employee)
+        {
+            _context.Employee.Add(employee);
+            _context.SaveChanges();
+            ViewBag.Message = "Record Inserted Successfully!";
+            ModelState.Clear();
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            var RecordID = _context.Employee.Where(x => x.ID == id).FirstOrDefault();
+            return View(RecordID);
+        }
+
+        [HttpPost]
+        public ActionResult Edit(Employee employee)
+        {
+            var RecordID = _context.Employee.Where(x => x.ID == employee.ID).FirstOrDefault();
+            if(RecordID != null)
+            {
+                RecordID.Emp_id = employee.Emp_id;
+                RecordID.Emp_Name = employee.Emp_Name;
+                RecordID.Gender = employee.Gender;
+                RecordID.Dept = employee.Dept;
+                RecordID.Designation = employee.Designation;
+                RecordID.Salary = employee.Salary;
+
+                _context.SaveChanges();
+            }
+            
+            return RedirectToAction("index");
+        }
+        
+        public ActionResult Detail(int id)
+        {
+            var RecordID = _context.Employee.Where(x => x.ID == id).FirstOrDefault();
+            return View(RecordID);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(int id)
+        {
+            var RecordID = _context.Employee.Where(x => x.ID == id).FirstOrDefault();
+            return View(RecordID);
+        }
+
+        [HttpPost]
+        public ActionResult Delete(Employees_log employee_log, Employee employee)
+        {
+            var RecordID = _context.Employee.Where(x => x.ID == employee.ID).FirstOrDefault();
+
+            if (RecordID != null)
+            {
+                employee_log.Emp_id = RecordID.Emp_id;
+                employee_log.Emp_Name = RecordID.Emp_Name;
+                employee_log.Gender = RecordID.Gender;
+                employee_log.Dept = RecordID.Dept;
+                employee_log.Designation = RecordID.Designation;
+                employee_log.Salary = RecordID.Salary;
+                employee_log.Mdate = DateTime.Now;
+
+                _context.Employee_log.Add(employee_log);
+            }
+
+            _context.Employee.Remove(RecordID);
+            _context.SaveChanges();
+            
+            return RedirectToAction("index");
+        }
+
+        public ActionResult LogHistory()
+        {
+            var HistorialData = _context.Employee_log.ToList();
+            return View(HistorialData);
+        }
+
+        public ActionResult About()
+        {
+            return View();
+        }
+
+        public ActionResult Contact()
+        {
+            return View();
+        }
+    }
+}
